@@ -3,10 +3,21 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+require('dotenv').config();
 
 const apiRouter = require('./routes/api');
 
 const app = express();
+
+// Set up mongoose connection
+const mongoose = require('mongoose');
+mongoose.set('strictQuery', false);
+const mongoDB = process.env.PROD_DB_URI || process.env.TEST_DB_STRING;
+
+main().catch((err) => console.log(err));
+async function main() {
+	await mongoose.connect(mongoDB);
+}
 
 app.use(logger('dev'));
 app.use(express.json());
