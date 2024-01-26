@@ -12,22 +12,15 @@ router.get('/users/token', auth.refreshToken);
 router.delete('/users/logout', auth.deleteRefreshToken);
 router.get('/users/:userId', userController.user_detail);
 
-// POSTS/COMMENTS
-router.get(
-	'/posts',
-	auth.verifyToken,
-	postController.post_list
-);
+// POSTS
+router.get('/posts', postController.post_list);
 router.post(
 	'/posts',
 	auth.verifyToken,
 	postController.post_create_post
 );
 
-router.get('/posts/:postId',
-	auth.verifyToken,
-	postController.post_detail
-);
+router.get('/posts/:postId', postController.post_detail);
 router.put('/posts/:postId',
 	auth.verifyToken,
 	postController.post_update

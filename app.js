@@ -25,7 +25,10 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors({
-	origin: 'http://127.0.0.1:5500'
+	origin: [
+		'http://127.0.0.1:5500',
+		'http://127.0.0.1:5173'
+	]
 }));
 app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
