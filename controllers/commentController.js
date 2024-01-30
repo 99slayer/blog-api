@@ -1,7 +1,7 @@
-const CommentSection = require('../models/commentSection');
 const Post = require('../models/post');
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
+const debug = require('debug')('controller:comment');
 
 exports.comment_list = asyncHandler(async (req, res, next) => {
 	const post = await Post.findById(req.params.postId).populate('comment_section');
@@ -11,15 +11,24 @@ exports.comment_list = asyncHandler(async (req, res, next) => {
 
 exports.comment_create_post = [
 	body('comment-name')
-		.trim(),
+		.trim()
+		.isLength({ min: 1, max: 60 }),
 	body('comment-text')
-		.trim(),
+		.trim()
+		.isLength({ min: 1, max: 500 }),
 
 	asyncHandler(async (req, res, next) => {
+		const errors = validationResult(req);
+
+		if (!errors.isEmpty()) {
+			debug(errors);
+			return res.sendStatus(400);
+		}
+
 		const post = await Post.findById(req.params.postId).populate('comment_section');
 
 		if (post == undefined) {
-			console.log('No post document.');
+			debug('No post document found.');
 			return res.sendStatus(404);
 		}
 

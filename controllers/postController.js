@@ -3,6 +3,7 @@ const User = require('../models/user');
 const CommentSection = require('../models/commentSection');
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
+const debug = require('debug')('controller:post');
 
 exports.post_list = asyncHandler(async (req, res, next) => {
 	const posts = await Post.find({}).populate('creator');
@@ -16,11 +17,20 @@ exports.post_detail = asyncHandler(async (req, res, next) => {
 
 exports.post_create_post = [
 	body('title')
-		.trim(),
+		.trim()
+		.isLength({ min: 1, max: 150 }),
 	body('text')
-		.trim(),
+		.trim()
+		.isLength({ min: 1, max: 20000 }),
 
 	asyncHandler(async (req, res, next) => {
+		const errors = validationResult(req);
+
+		if (!errors.isEmpty()) {
+			debug(errors);
+			return res.sendStatus(400);
+		}
+
 		const creator = await User.findOne({ username: req.headers.username });
 
 		const commentSection = new CommentSection({
@@ -44,11 +54,20 @@ exports.post_create_post = [
 
 exports.post_update = [
 	body('title')
-		.trim(),
+		.trim()
+		.isLength({ min: 1, max: 150 }),
 	body('text')
-		.trim(),
+		.trim()
+		.isLength({ min: 1, max: 20000 }),
 
 	asyncHandler(async (req, res, next) => {
+		const errors = validationResult(req);
+
+		if (!errors.isEmpty()) {
+			debug(errors);
+			return res.sendStatus(400);
+		}
+
 		const updatedPost = await Post.findOneAndUpdate(
 			{ _id: req.params.postId },
 			{

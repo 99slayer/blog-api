@@ -1,6 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+const debug = require('debug')('auth');
 
 const RefreshTokenSchema = new mongoose.Schema({
 	refresh_token: { type: String, required: true }
@@ -12,7 +13,6 @@ const RefreshToken = mongoose.model(
 
 // Send with access token and refresh token.
 function verifyToken(req, res, next) {
-	console.log('Authorizing user.');
 	const authHeader = req.headers['authorization'];
 	const token = authHeader && authHeader.split(' ')[1];
 
@@ -23,6 +23,7 @@ function verifyToken(req, res, next) {
 		process.env.ACCESS_TOKEN_SECRET,
 		(err, authData) => {
 			if (err) {
+				debug(err);
 				return res.sendStatus(401);
 			} else {
 				next();
@@ -33,8 +34,6 @@ function verifyToken(req, res, next) {
 
 // Attempts to renew user access using a refresh token.
 async function refreshToken(req, res, next) {
-	console.log('Refreshing user access.');
-
 	if (req.headers.refreshtoken == null) return res.sendStatus(400);
 
 	const tokens = await RefreshToken.find({});
@@ -51,6 +50,7 @@ async function refreshToken(req, res, next) {
 		process.env.REFRESH_TOKEN_SECRET,
 		(err, authData) => {
 			if (err) {
+				debug(err);
 				if (err.name === 'TokenExpiredError') deleteRefreshToken(req, res, next);
 				return res.sendStatus(401);
 			} else {
@@ -97,7 +97,7 @@ async function generateRefreshToken(user) {
 async function deleteRefreshToken(req, res, next) {
 	const authHeader = req.headers.refreshtoken;
 	const token = authHeader.split('=')[1];
-	console.log('Revoking access refresh.');
+	debug('Revoking access refresh.')
 
 	if (token == null) return res.sendStatus(400);
 
